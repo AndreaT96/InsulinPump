@@ -17,7 +17,7 @@ REQUISITI NON FUNZIONALI
 1. Durata del sistema (previsione rottura del sistema)
 2. Durata batterie (pompa e sensore)
 3. Precisione del sensore
-4. Quantità di insulina massima nel serbatoio
+4. Quantità di insulina massima nel serbatoio: 300 units
 5. Max downtime 1 minute
 6. Capacità della memoria per il download dei dati
 7. Max delay: 5 sec
