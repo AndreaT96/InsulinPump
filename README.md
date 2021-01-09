@@ -1,25 +1,37 @@
 # InsulinPump
 
-REQUISITI FUNZIONALI
+## REQUISITI FUNZIONALI
 
-1. Rilevamento del glucosio nel sangue
-2. Calcolo di insulina da erogare
-3. Erogazione dell'insulina
-4. Segnalare la mancanza di insulina nella pompa
-5. Rilevamento del glucosio ogni 10 minuti
-6. Segnalare la durata delle batterie
-7. Segnalare malfunzionamenti hardware/software
-8. Scaricare lo storico dei dati rilevati
+* Rilevamento del livello di glucosio nel sangue periodico (10 minuti)
+* Calcolo dose di insulina da erogare
+* Erogazione dell'insulina
+* Segnalazione automatica esaurimento d'insulina nella pompa
+* Segnalazione automatica esaurimento carica delle batterie
+* Segnalazione automatica malfunzionamenti hardware/software
+* Visualizzazione su display dei dati rilevati
+* Scaricamento dello storico dei dati rilevati
 
 
-REQUISITI NON FUNZIONALI
+## REQUISITI NON FUNZIONALI
 
-1. Durata del sistema (previsione rottura del sistema)
-2. Durata batterie (pompa e sensore)
-3. Precisione del sensore
-4. Quantità di insulina massima nel serbatoio: 300 units
-5. Max downtime 1 minute
-6. Capacità della memoria per il download dei dati
-7. Max delay: 5 sec
-8. Dimensioni massime (peso e misure)
-9. No side effects
+* Durata (stimata) del sistema di almeno 3 anni
+* Pompa: 
+    * Durata della batteria di almeno 3 giorni
+    * Capacità del serbatoio compresa fra 280-320 unità
+    * Dimensioni massime della pompa: 5.5cm x 10.0cm x 2.5cm
+    * Peso massimo (vuoto): 30.0g
+    * Impermeabile per 60 minuti a un massimo di 10 metri di profondità
+    * Display con dimensione minima di 2 pollici
+* Sensore:
+    * Durata della batteria di almeno 7 giorni
+    * Precisione: MARD (Mean Absolute Relative Difference ) inferiore a 10%
+    * Dimensioni massime: 3.0cm x 4.0cm x 1.5 cm
+    * Peso massimo: 10.0g
+    * Impermeabile per 60 minuti a un massimo di 10 metri di profondità
+* Display portatile:
+    * Dimensioni schermo: minimo 2 pollici
+* Batterie litio ricaricabili tramite porte USB-C
+* Tempo massimo prima del rilevamento di un guasto di 1 minuto
+* Abbastanza capacità di memoria per il salvataggio delle rilevazioni storiche degli ultimi 6 mesi
+* Delay massimo risposta UI 5 secondi
+* Sistema conforme a tutte le norme Italiane in materia
