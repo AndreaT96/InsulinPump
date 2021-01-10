@@ -16,7 +16,7 @@
 
 * Durata (stimata) del sistema di almeno 3 anni
 * Pompa: 
-    * Durata della batteria di almeno 3 giorni
+    * Durata della batteria di almeno 7 giorni
     * Capacità del serbatoio compresa fra 280-320 unità
     * Dimensioni massime della pompa: 5.5cm x 10.0cm x 2.5cm
     * Peso massimo (vuoto): 30.0g
