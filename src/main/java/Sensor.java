@@ -4,8 +4,8 @@ public class Sensor {
     private Battery battery = new Battery();
 
     /**
-     *  Metodo che restituisce il livello di zucchero nel sangue.
-     *  La durata della batteria è data dalla classe Battery().
+     * This methods return the blood-sugar level.
+     * The charge of battery is calculated by Battery() class.
      */
     public int getSugar_level(){
         sugar_level = sugar_level + ( (int) (Math.random() * 10) - 5 );
@@ -14,8 +14,8 @@ public class Sensor {
     }
 
     /**
-     *  Metodo che restituisce il livello di batteria del sensore.
-     *  La durata della batteria è data dalla classe Battery().
+     * This methods return the battery level of sensor.
+     * The charge of battery is calculated by Battery() class.
      */
     public double getBattery(){
         if (battery.getBatteryPercentage() == 0){
