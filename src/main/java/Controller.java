@@ -19,7 +19,7 @@ public class Controller {
         sensor = new Sensor();
         pump = new Pump();
         display_one = display_two = new Display();
-        clock = new Clock();
+        clock = new Clock(this);
 
         try {
             /*
@@ -31,25 +31,20 @@ public class Controller {
             }
 
             restoreLastMeasurements();
-            /*
-            for(int i : last_measurements) {
-                System.out.println(i);
-            }
-            */
 
-            /*
-            state.executeUpdate("INSERT INTO misure(lettura) VALUES ('100');");
-            rs = state.executeQuery("SELECT count(*) AS prova FROM misure");
-            while (rs.next()) {
-                System.out.println(rs.getInt("prova"));
-            }
-            */
+            clock.startTasks();
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
 
     }
+
+    public Runnable insulinTask = () -> {
+        pump.injectInsulin(computeInsulinDose());
+        //TODO segnarsi nel DB quanta insulina è stata iniettata
+        System.out.println(Clock.getTime().toString());
+    };
 
     /**
      * Calculates the insulin dose based on the last 3 readings.
