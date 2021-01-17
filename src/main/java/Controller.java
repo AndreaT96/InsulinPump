@@ -18,7 +18,7 @@ public class Controller {
     public Controller(){
         sensor = new Sensor();
         pump = new Pump();
-        display_one = display_two = new Display();
+        display_one = display_two = new Display(); //TODO parte grafica
         clock = new Clock(this);
 
         try {
@@ -30,9 +30,13 @@ public class Controller {
                 Util.sqlIteCreateTables(conn);
             }
 
+            /*
+             * System initialization
+             */
             restoreLastMeasurements();
-
             clock.startTasks();
+
+
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -40,17 +44,49 @@ public class Controller {
 
     }
 
-    public Runnable insulinTask = () -> {
-        pump.injectInsulin(computeInsulinDose());
-        //TODO segnarsi nel DB quanta insulina è stata iniettata
-        System.out.println(Clock.getTime().toString());
+    public final Runnable insulinTask = () -> {
+        try {
+            readAndSaveReading();
+            /* reading >= safe zone min, so if dose = 0 no call injectInsuline */
+            int dose;
+
+            if (last_measurements[2] >= Util.SAFE_ZONE_MIN && last_measurements[2] <= Util.SAFE_ZONE_MAX) {
+                dose = computeSafeInsulinDose();
+            } else if (last_measurements[2] < Util.SAFE_ZONE_MIN) {
+                dose = 0;
+            } else {
+                dose = computeUnsafeInsulinDose();
+            }
+            System.out.println("Dose = " + String.valueOf(dose));
+            if(dose != 0) {
+                pump.injectInsulin(dose);
+            }
+            //TODO segnarsi nel DB quanta insulina è stata iniettata
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    };
+
+    //TODO bippaggi vari
+    public final Runnable systemCheckTask = () -> {
+        if(pump.checkStatus()) {
+            //System.out.println("La pompa funziona");
+        } else {
+            System.out.println("La pompa non funziona");
+        }
+        if(sensor.checkStatus()) {
+            //System.out.println("Il sensore funziona");
+        } else {
+            System.out.println("Il sensore non funziona");
+        }
     };
 
     /**
-     * Calculates the insulin dose based on the last 3 readings.
+     * Calculates the insulin dose based on the last 3 readings when the sugar level is in the safe zone.
      * @return the insulin dose.
      */
-    public int computeInsulinDose() {
+    public int computeSafeInsulinDose() {
         if(last_measurements[2] <= last_measurements[1]) return 0;
         if(last_measurements[2] - last_measurements[1] < last_measurements[1] - last_measurements[0]) return 0;
         int compDose = (last_measurements[2] - last_measurements[1]) / 4;
@@ -58,6 +94,17 @@ public class Controller {
         return compDose;
     }
 
+    /**
+     * Calculates the insulin dose based on the last 3 readings when the sugar level is not in the safe zone.
+     * @return the insulin dose.
+     */
+    public int computeUnsafeInsulinDose() { //TODO da fare dopo aver sentito il prof
+        if(last_measurements[2] <= last_measurements[1]) return 0;
+        if(last_measurements[2] - last_measurements[1] < last_measurements[1] - last_measurements[0]) return 0;
+        int compDose = (last_measurements[2] - last_measurements[1]) / 4;
+        if(compDose == 0) compDose = Util.MINIMUM_DOSE;
+        return compDose;
+    }
     /**
      * Loads into "last_measurements" array the two most recent sugar level measurements from the Database, as long as they're not older than 45 minutes.
      * Otherwise it'll use a newly made reading from the sensor.

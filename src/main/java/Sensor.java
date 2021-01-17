@@ -1,3 +1,6 @@
+/**
+ * This mockup class represents a basic battery powered blood sugar sensor.
+ */
 public class Sensor {
     
     private int sugar_level = 130;
@@ -8,7 +11,8 @@ public class Sensor {
      * The charge of battery is calculated by Battery() class.
      */
     public int getSugar_level(){
-        sugar_level = sugar_level + ( (int) (Math.random() * 10) - 5 );
+        //TODO pseudo random per evitare che l'insulina scenda o salga troppo
+        sugar_level = sugar_level + ( (int) (Math.random() * 20) - 10 );
         battery.decreaseLevel(1);
         return sugar_level;
     }
@@ -24,4 +28,7 @@ public class Sensor {
         return battery.getBatteryPercentage();
     }
 
+    public boolean checkStatus() {
+        return battery.getChargeLevel() > 0;
+    }
 }

@@ -4,11 +4,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This mockup class represents the clock component of the controller. It's also used to schedule the periodic tasks.
+ */
 public class Clock {
 
     private Controller controller;
     private ScheduledExecutorService ses;
-    private ScheduledFuture<?> scheduledFuture;
+    private ScheduledFuture<?> scheduledInsulinFuture;
+    private ScheduledFuture<?> scheduledSystemCheckFuture;
 
     Clock(Controller controller) {
         this.controller = controller;
@@ -16,12 +20,13 @@ public class Clock {
 
     public void startTasks() {
         ses = Executors.newScheduledThreadPool(2);
-        scheduledFuture = ses.scheduleAtFixedRate(controller.insulinTask, 5, 1, TimeUnit.SECONDS);
-        ScheduledFuture<?> scheduledFuture2 = ses.scheduleAtFixedRate(controller.insulinTask, 5, 1, TimeUnit.SECONDS);
+        scheduledInsulinFuture = ses.scheduleAtFixedRate(controller.insulinTask, 0, 600000/Util.SPEED, TimeUnit.MILLISECONDS);
+        scheduledSystemCheckFuture = ses.scheduleAtFixedRate(controller.systemCheckTask, 0, 6000/Util.SPEED, TimeUnit.MILLISECONDS);
     }
 
     public void stopTasks() {
-        scheduledFuture.cancel(true);
+        scheduledInsulinFuture.cancel(true);
+        scheduledSystemCheckFuture.cancel(true);
         ses.shutdown();
     }
 

@@ -1,4 +1,7 @@
 import lombok.*;
+/**
+ * This mockup class represents the pump component of the insulin pump. It contains a reservoir of insulin and is capable to inject it into the patient. It's powered by a battery.
+ */
 public class Pump {
     @Getter @Setter int reservoir;
     private Battery battery;
@@ -13,7 +16,7 @@ public class Pump {
      * @return true if the pump is working properly, else if a mechanical problem has been detected.
      */
     public boolean checkStatus() {
-        return reservoir >= MINIMUM_RESERVOIR_LEVEL;
+        return reservoir >= MINIMUM_RESERVOIR_LEVEL && battery.getChargeLevel() > 0;
     }
 
     /**
