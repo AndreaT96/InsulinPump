@@ -20,23 +20,4 @@ public class Util {
         if(string == null) return  null;
         return LocalDateTime.from(sqliteFormatter.parse(string));
     }
-
-    public static int sqlIteCreateTables(Connection conn) throws SQLException {
-        Statement state = conn.createStatement();
-        return state.executeUpdate("CREATE TABLE misure(id INTEGER PRIMARY KEY AUTOINCREMENT, data TIMESTAMP default CURRENT_TIMESTAMP, lettura INTEGER);");
-    }
-
-    public static boolean isDBEmpty(Connection conn) throws SQLException {
-        Statement state = conn.createStatement();
-        ResultSet rs = state.executeQuery("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'misure'");
-        return !rs.next();
-    }
-
-    public static int sqlIteInsertReading(Connection conn, int level) throws SQLException {
-        return sqlIteInsertReading(conn, level, Clock.getTime());
-    }
-    public static int sqlIteInsertReading(Connection conn, int level, LocalDateTime date) throws SQLException {
-        Statement state = conn.createStatement();
-        return state.executeUpdate("INSERT INTO misure(data, lettura) VALUES ('" + dateToSqliteString(date)+"', '"+ String.valueOf(level) + "');");
-    }
 }

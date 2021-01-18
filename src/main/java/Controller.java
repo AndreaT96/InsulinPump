@@ -10,8 +10,8 @@ public class Controller {
     @Getter private Sensor sensor;
     @Getter private Display display_one;
     @Getter private Display display_two;
-    @Getter private Connection conn;
     @Getter private Clock clock;
+    @Getter private DBManager dbManager;
 
     private int[] last_measurements = new int[3];
 
@@ -23,16 +23,9 @@ public class Controller {
 
         try {
             /*
-             * Create database if not exists
-             */
-            conn = DriverManager.getConnection("jdbc:sqlite:InsulinPump.db");
-            if(Util.isDBEmpty(conn)) {
-                Util.sqlIteCreateTables(conn);
-            }
-
-            /*
              * System initialization
              */
+            dbManager = new DBManager();
             restoreLastMeasurements();
             clock.startTasks();
 
@@ -57,11 +50,11 @@ public class Controller {
             } else {
                 dose = computeUnsafeInsulinDose();
             }
-            System.out.println("Dose = " + String.valueOf(dose));
+            System.out.println("Dose = " + dose);
             if(dose != 0) {
                 pump.injectInsulin(dose);
             }
-            //TODO segnarsi nel DB quanta insulina è stata iniettata
+            dbManager.sqlIteInsertInjection(dose, clock.getTime());
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -119,13 +112,12 @@ public class Controller {
         last_measurements[0] = last_measurements[2];
 
         //Read up to last 2 measurements from the DB. If they're fresh, they'll become our R1 and R0
-        Statement state = conn.createStatement();
-        ResultSet rs = state.executeQuery("SELECT data, lettura FROM misure ORDER BY data DESC LIMIT 2;");
+        ResultSet rs = dbManager.getLastNReadings(2);
         int i = 1;
         while(rs.next() && i >= 0) {
             LocalDateTime timestamp = Util.sqlIteParseDate(rs.getString("data"));
             if(timestamp != null) {
-                long minutes = ChronoUnit.MINUTES.between(Clock.getTime(), timestamp);
+                long minutes = ChronoUnit.MINUTES.between(clock.getTime(), timestamp);
                 if(minutes < 0) minutes = - minutes;
                 if (minutes <= Util.CONTROLLER_BOOT_FRESHNESS_MINUTES) {
                     last_measurements[i--] = rs.getInt("lettura");
@@ -133,20 +125,18 @@ public class Controller {
             }
         }
         //add latest reading (new) to DB
-        Util.sqlIteInsertReading(conn, last_measurements[2]);
+        dbManager.sqlIteInsertReading(last_measurements[2], clock.getTime());
     }
-
     /**
      * Reads the sugar level from the sensors then stores it in the DB.
      * @return the result code of the DB insertion
-     * @throws SQLException
+     * @throws SQLException whenever a DB error occurs
      */
     private int readAndSaveReading() throws SQLException {
         last_measurements[0] = last_measurements[1];
         last_measurements[1] = last_measurements[2];
         last_measurements[2] = sensor.getSugar_level();
-        return Util.sqlIteInsertReading(conn,last_measurements[2]);
+        return dbManager.sqlIteInsertReading(last_measurements[2], clock.getTime());
     }
-
 }
 
