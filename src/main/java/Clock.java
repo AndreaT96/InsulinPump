@@ -1,4 +1,5 @@
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -9,13 +10,16 @@ import java.util.concurrent.TimeUnit;
  */
 public class Clock {
 
-    private Controller controller;
+    private final Controller controller;
     private ScheduledExecutorService ses;
     private ScheduledFuture<?> scheduledInsulinFuture;
     private ScheduledFuture<?> scheduledSystemCheckFuture;
-
+    private LocalDateTime lastRealTime;
+    private LocalDateTime lastReadTime;
     Clock(Controller controller) {
         this.controller = controller;
+        this.lastReadTime = LocalDateTime.now();
+        this.lastRealTime = LocalDateTime.now();
     }
 
     public void startTasks() {
@@ -30,7 +34,11 @@ public class Clock {
         ses.shutdown();
     }
 
-    public static LocalDateTime getTime() {
-        return LocalDateTime.now();
+    public LocalDateTime getTime() {
+        LocalDateTime now = LocalDateTime.now();
+        lastReadTime = lastReadTime.plusNanos(ChronoUnit.NANOS.between(lastRealTime,now)*Util.SPEED);
+        lastRealTime = now;
+        System.out.println(lastReadTime);
+        return  lastReadTime;
     }
 }
