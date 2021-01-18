@@ -11,8 +11,13 @@ public class Sensor {
      * The charge of battery is calculated by Battery() class.
      */
     public int getSugar_level(){
-        //TODO pseudo random per evitare che l'insulina scenda o salga troppo
-        sugar_level = sugar_level + ( (int) (Math.random() * 20) - 10 );
+        if(sugar_level > 150) {
+            sugar_level += (int) (Math.random() * 10) - 10;
+        } else if(sugar_level < 40) {
+            sugar_level += (int) (Math.random() * 20);
+        } else {
+            sugar_level += (int) (Math.random() * 20) - 10;
+        }
         battery.decreaseLevel(1);
         return sugar_level;
     }
