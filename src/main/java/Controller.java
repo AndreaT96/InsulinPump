@@ -82,7 +82,7 @@ public class Controller {
     public int computeSafeInsulinDose() {
         if(last_measurements[2] <= last_measurements[1]) return 0;
         if(last_measurements[2] - last_measurements[1] < last_measurements[1] - last_measurements[0]) return 0;
-        int compDose = (last_measurements[2] - last_measurements[1]) / 4;
+        int compDose = (last_measurements[2] - last_measurements[1]) / (4*18); //1 mmol/L = 18 mg/dL
         if(compDose == 0) compDose = Util.MINIMUM_DOSE;
         return compDose;
     }
@@ -91,13 +91,14 @@ public class Controller {
      * Calculates the insulin dose based on the last 3 readings when the sugar level is not in the safe zone.
      * @return the insulin dose.
      */
-    public int computeUnsafeInsulinDose() { //TODO da fare dopo aver sentito il prof
-        if(last_measurements[2] <= last_measurements[1]) return 0;
-        if(last_measurements[2] - last_measurements[1] < last_measurements[1] - last_measurements[0]) return 0;
-        int compDose = (last_measurements[2] - last_measurements[1]) / 4;
-        if(compDose == 0) compDose = Util.MINIMUM_DOSE;
-        return compDose;
+    public int computeUnsafeInsulinDose() {
+        // without specific requirements
+        if(last_measurements[2] > Util.DANGEROUS_ZONE)
+            return 1 + 2 * computeSafeInsulinDose();
+        else
+            return 2 * computeSafeInsulinDose();
     }
+
     /**
      * Loads into "last_measurements" array the two most recent sugar level measurements from the Database, as long as they're not older than 45 minutes.
      * Otherwise it'll use a newly made reading from the sensor.
@@ -127,6 +128,7 @@ public class Controller {
         //add latest reading (new) to DB
         dbManager.sqlIteInsertReading(last_measurements[2], clock.getTime());
     }
+
     /**
      * Reads the sugar level from the sensors then stores it in the DB.
      * @return the result code of the DB insertion
