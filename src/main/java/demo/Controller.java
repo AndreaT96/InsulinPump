@@ -1,8 +1,11 @@
+package demo;
+
 import lombok.*;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 public class Controller {
 
@@ -15,7 +18,7 @@ public class Controller {
 
     private int[] last_measurements = new int[3];
 
-    public Controller(){
+    public Controller(MisuraRepository misuraRepository, IniezioneRepository iniezioneRepository){
         sensor = new Sensor();
         pump = new Pump();
         display_one = display_two = new Display(); //TODO parte grafica
@@ -25,7 +28,7 @@ public class Controller {
             /*
              * System initialization
              */
-            dbManager = new DBManager();
+            dbManager = new DBManager(misuraRepository, iniezioneRepository);
             restoreLastMeasurements();
             clock.startTasks();
 
@@ -113,15 +116,17 @@ public class Controller {
         last_measurements[0] = last_measurements[2];
 
         //Read up to last 2 measurements from the DB. If they're fresh, they'll become our R1 and R0
-        ResultSet rs = dbManager.getLastNReadings(2);
+        List<Misura> rs = dbManager.getLastNReadings(2);
+
         int i = 1;
-        while(rs.next() && i >= 0) {
-            LocalDateTime timestamp = Util.sqlIteParseDate(rs.getString("data"));
+        for(Misura m : rs) {
+            if(i < 0) break;
+            LocalDateTime timestamp = m.getDate();
             if(timestamp != null) {
                 long minutes = ChronoUnit.MINUTES.between(clock.getTime(), timestamp);
                 if(minutes < 0) minutes = - minutes;
                 if (minutes <= Util.CONTROLLER_BOOT_FRESHNESS_MINUTES) {
-                    last_measurements[i--] = rs.getInt("lettura");
+                    last_measurements[i--] = m.getLettura();
                 }
             }
         }
@@ -134,7 +139,7 @@ public class Controller {
      * @return the result code of the DB insertion
      * @throws SQLException whenever a DB error occurs
      */
-    private int readAndSaveReading() throws SQLException {
+    private Long readAndSaveReading() throws SQLException {
         last_measurements[0] = last_measurements[1];
         last_measurements[1] = last_measurements[2];
         last_measurements[2] = sensor.getSugar_level();

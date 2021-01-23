@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>MVC Web application</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+
+<body>
+<h1>People list</h1>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Data</th>
+        <th>Lettura</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="misura: ${misure}">
+        <td th:text="${misura.id}"> <b>10 </b></td>
+        <td th:text="${misura.date}"> 01/01/1970 </td>
+        <td th:text="${misura.lettura}"> 0 </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

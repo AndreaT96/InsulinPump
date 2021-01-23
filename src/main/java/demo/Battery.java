@@ -1,3 +1,5 @@
+package demo;
+
 import lombok.*;
 public class Battery {
     private boolean bCharging;
@@ -10,7 +12,7 @@ public class Battery {
     }
 
     /**
-     * Constructs a Battery object with a customized capacity. The battery is FULLY charged.
+     * Constructs a demo.Battery object with a customized capacity. The battery is FULLY charged.
      * @param capacity this parameter is just a mockup. The bigger the number the longer it lasts
      */
     public Battery(int capacity) {

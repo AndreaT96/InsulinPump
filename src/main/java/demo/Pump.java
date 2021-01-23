@@ -1,3 +1,5 @@
+package demo;
+
 import lombok.*;
 /**
  * This mockup class represents the pump component of the insulin pump. It contains a reservoir of insulin and is capable to inject it into the patient. It's powered by a battery.

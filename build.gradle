@@ -2,17 +2,25 @@ plugins {
     id 'java'
     id 'application'
     id "io.freefair.lombok" version "5.3.0"
+    id 'org.springframework.boot' version '2.3.2.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
 }
 apply plugin : "java"
 ext {
-    javaMainClass = "Banana"
+    javaMainClass = "demo.Banana"
 }
 application {
-    mainClassName = "Banana"
+    mainClassName = "demo.Banana"
 }
 group 'it.univr'
 version '1.0-SNAPSHOT'
 
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
 repositories {
     mavenCentral()
 }
@@ -21,6 +29,16 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
     compile 'org.xerial:sqlite-jdbc:3.32.3.2'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.h2database:h2'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
 test {
