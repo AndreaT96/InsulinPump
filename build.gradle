@@ -7,10 +7,10 @@ plugins {
 }
 apply plugin : "java"
 ext {
-    javaMainClass = "demo.Banana"
+    javaMainClass = "com.insulinpump.mainImpl"
 }
 application {
-    mainClassName = "demo.Banana"
+    mainClassName = "com.insulinpump.mainImpl"
 }
 group 'it.univr'
 version '1.0-SNAPSHOT'

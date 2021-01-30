@@ -1,0 +1,51 @@
+.themed-grid-col {
+  padding-top: .75rem;
+  padding-bottom: .75rem;
+  background-color: rgba(88,133,175, .35);
+  border: 2px solid rgba(65,114,159, .2);
+  color: #E87A00;
+  font-size: 2rem;
+  text-shadow: 0.1rem 0 0 #fff, -0.1rem 0 0 #fff, 0 0.1rem 0 #fff, 0 -0.1rem 0 #fff, 0.05rem 0.05rem #fff, -0.05rem -0.05rem 0 #fff, 0.05rem -0.05rem 0 #fff, -0.05rem 0.05rem 0 #fff;
+
+}
+
+.themed-container {
+  padding: .10rem;
+  margin-bottom: 0.5rem;
+  background-color: rgba(0,31,61, .35);
+  border: 2px solid rgba(0, 123, 255, .2);
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 3fr 3fr 2fr 2fr;
+  grid-template-rows: 2fr 2fr 3fr 3fr;
+  gap: 1px 1px;
+  grid-template-areas:
+    "Data Data Pump pBattery"
+    "Ora Ora pReservoir pAlert"
+    "Sensor sBattery sugar sugar"
+    "sAlert pulsanti sugar sugar";
+}
+
+.Data { grid-area: Data; }
+
+.Ora { grid-area: Ora; }
+
+.Sensor { grid-area: Sensor; }
+
+.Pump { grid-area: Pump; }
+
+.pBattery { grid-area: pBattery; }
+
+.pAlert { grid-area: pAlert; }
+
+.pReservoir { grid-area: pReservoir; }
+
+.sBattery { grid-area: sBattery; }
+
+.sAlert { grid-area: sAlert; }
+
+.sugar {	grid-area: sugar;	}
+
+.pulsanti { grid-area: pulsanti; }
