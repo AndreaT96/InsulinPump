@@ -61,6 +61,12 @@ public class WebController {
         return "graph";
     }
 
+    @RequestMapping("/graph2")
+    public String insulinGraph(Model model) {
+        model.addAttribute("dataPoints", iniezioneRepository.findNByOrderByDateDesc(100));
+        return "graph2";
+    }
+
     @RequestMapping("/reduceInsulin")
     public String reduceInsulin(Model model){
         controller.getPump().setReservoir(Math.max(0, controller.getPump().getReservoir() - 100));
