@@ -35,32 +35,13 @@ public class Controller {
         clock = new Clock(this);
         buzzer = new Buzzer();
 
-        try {
-            /*
-             * System initialization
-             */
-            dbManager = new DBManager(misuraRepository, iniezioneRepository);
-            restoreLastMeasurements();
-            clock.startTasks();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
+        dbManager = new DBManager(misuraRepository, iniezioneRepository);
+        restoreLastMeasurements();
     }
 
     public final Runnable insulinTask = () -> {
         readAndSaveReading();
-        /* reading >= safe zone min, so if dose = 0 no call injectInsuline */
-        int dose;
-
-        if (last_measurements[2] >= Util.SAFE_ZONE_MIN && last_measurements[2] <= Util.SAFE_ZONE_MAX) {
-            dose = computeSafeInsulinDose();
-        } else if (last_measurements[2] < Util.SAFE_ZONE_MIN) {
-            dose = 0;
-        } else {
-            dose = computeUnsafeInsulinDose();
-        }
-        System.out.println("Dose = " + dose);
+        int dose = computeDose();
         if(dose != 0) {
             pump.injectInsulin(dose);
         }
@@ -119,6 +100,25 @@ public class Controller {
     };
 
     /**
+     * Calculates the correct insulin dose based on the last 3 readings.
+     * @return the insulin dose.
+     */
+    public int computeDose() {
+        /* reading >= safe zone min, so if dose = 0 no call injectInsuline */
+        int dose;
+
+        if (last_measurements[2] >= Util.SAFE_ZONE_MIN && last_measurements[2] <= Util.SAFE_ZONE_MAX) {
+            dose = computeSafeInsulinDose();
+        } else if (last_measurements[2] < Util.SAFE_ZONE_MIN) {
+            dose = 0;
+        } else {
+            dose = computeUnsafeInsulinDose();
+        }
+        System.out.println("Dose = " + dose);
+        return dose;
+    }
+
+    /**
      * Calculates the insulin dose based on the last 3 readings when the sugar level is in the safe zone.
      * @return the insulin dose.
      */
@@ -145,15 +145,13 @@ public class Controller {
     /**
      * Loads into "last_measurements" array the two most recent sugar level measurements from the Database, as long as they're not older than 45 minutes.
      * Otherwise it'll use a newly made reading from the sensor.
-     * @throws SQLException whenever there's a problem with the local DB
      */
-    private void restoreLastMeasurements() throws SQLException {
+    private void restoreLastMeasurements() {
         //Do a measurement as soon as the controller boots up. this will be our R2
-        last_measurements[2] = sensor.getSugar_level();
-
         //Fill preemptively the other 2 array cells with the same value. If suitable readings will be found in the DB, those ones will be used instead.
-        last_measurements[1] = last_measurements[2];
-        last_measurements[0] = last_measurements[2];
+        int currentReading = sensor.getSugar_level();
+        forceLastReadings(currentReading, currentReading, currentReading);
+
 
         //Read up to last 2 measurements from the DB. If they're fresh, they'll become our R1 and R0
         List<Misura> rs = dbManager.getLastNReadings(2);
@@ -186,6 +184,15 @@ public class Controller {
         display_one.setSugarLevel(last_measurements[2]);
         display_two.setSugarLevel(last_measurements[2]);
         return dbManager.sqlIteInsertReading(last_measurements[2], clock.getTime());
+    }
+
+    /**
+     *
+     */
+    public void forceLastReadings(int r0, int r1, int r2) {
+        last_measurements[0] = r0;
+        last_measurements[1] = r1;
+        last_measurements[2] = r2;
     }
 }
 

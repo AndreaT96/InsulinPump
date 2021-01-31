@@ -16,7 +16,7 @@ public class DBManager {
     private MisuraRepository misuraRepository;
     private IniezioneRepository iniezioneRepository;
 
-    public DBManager(MisuraRepository misuraRepository, IniezioneRepository iniezioneRepository) throws SQLException {
+    public DBManager(MisuraRepository misuraRepository, IniezioneRepository iniezioneRepository) {
         this.misuraRepository = misuraRepository;
         this.iniezioneRepository = iniezioneRepository;
     }

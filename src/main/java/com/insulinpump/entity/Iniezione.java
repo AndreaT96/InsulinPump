@@ -27,12 +27,4 @@ public class Iniezione {
         this.date = date;
         this.unita = unita;
     }
-
-    @Override
-    public String toString() {
-        return String.format(
-                "com.insulinpump.entity.Iniezione[id=%d, date='%s', lettura='%i']",
-                id, Util.dateToSqliteString(date), unita);
-    }
-
 }
