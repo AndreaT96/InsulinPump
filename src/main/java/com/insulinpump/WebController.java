@@ -26,6 +26,7 @@ public class WebController {
         this.misuraRepository = misuraRepository;
         this.iniezioneRepository = iniezioneRepository;
         this.controller = controller;
+        controller.getClock().startTasks();
     }
 
     @RequestMapping("/")
@@ -54,9 +55,15 @@ public class WebController {
         return "dashboard";
     }
 
+    @RequestMapping("/graph")
+    public String measurementGraph(Model model) {
+        model.addAttribute("dataPoints", misuraRepository.findNByOrderByDateDesc(100));
+        return "graph";
+    }
+
     @RequestMapping("/reduceInsulin")
     public String reduceInsulin(Model model){
-        controller.getPump().setReservoir(controller.getPump().getReservoir()/(int)(1 + Math.random()*4));
+        controller.getPump().setReservoir(Math.max(0, controller.getPump().getReservoir() - 100));
         return "redirect:/dashboard";
     }
 
@@ -68,13 +75,13 @@ public class WebController {
 
     @RequestMapping("/decreaseSensorBattery")
     public String decreaseSensorBattery(Model model) {
-        controller.getSensor().getBattery().setChargeLevel(controller.getSensor().getBattery().getChargeLevel()/(int)(1 + Math.random()*4));
+        controller.getSensor().getBattery().setChargeLevel(controller.getSensor().getBattery().getChargeLevel() / 2);
         return "redirect:/dashboard";
     }
 
     @RequestMapping("/decreasePumpBattery")
     public String decreasePumpBattery(Model model) {
-        controller.getPump().getBattery().setChargeLevel(controller.getPump().getBattery().getChargeLevel()/(int)(1 + Math.random()*4));
+        controller.getPump().getBattery().setChargeLevel(controller.getPump().getBattery().getChargeLevel() / 2);
         return "redirect:/dashboard";
     }
 
