@@ -1,5 +1,6 @@
-package com.insulinpump;
+package com.insulinpump.unittest;
 
+import com.insulinpump.Controller;
 import com.insulinpump.Util;
 import com.insulinpump.entity.Misura;
 import com.insulinpump.repository.IniezioneRepository;
@@ -7,22 +8,15 @@ import com.insulinpump.repository.MisuraRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ControllerTest {
 
-    //@Mock
     private Controller controller;
 
     @Mock
@@ -32,20 +26,20 @@ public class ControllerTest {
 
     @Before
     public void init(){
-        Mockito.when(misuraRepository.save(Mockito.any(Misura.class))).thenAnswer(i -> i.getArguments()[0]);
         assertTrue(misuraRepository != null && iniezioneRepository != null );
+        Mockito.when(misuraRepository.save(Mockito.any(Misura.class))).thenAnswer(i -> i.getArguments()[0]);
         controller = Mockito.spy(new Controller(misuraRepository, iniezioneRepository));
     }
 
     @Test
     public void testGettersNonNull() {
-        assertTrue("Pump shouldn't be null", controller.getPump() != null);
-        assertTrue("Clock shouldn't be null", controller.getClock() != null);
-        assertTrue("Sensor shouldn't be null", controller.getSensor() != null);
-        assertTrue("Display_one shouldn't be null", controller.getDisplay_one() != null);
-        assertTrue("Display_two shouldn't be null", controller.getDisplay_two() != null);
-        assertTrue("DB manager shouldn't be null", controller.getDbManager() != null);
-        assertTrue("Buzzer shouldn't be null", controller.getBuzzer() != null);
+        assertNotNull("Pump shouldn't be null", controller.getPump());
+        assertNotNull("Clock shouldn't be null", controller.getClock());
+        assertNotNull("Sensor shouldn't be null", controller.getSensor());
+        assertNotNull("Display_one shouldn't be null", controller.getDisplay_one());
+        assertNotNull("Display_two shouldn't be null", controller.getDisplay_two());
+        assertNotNull("DB manager shouldn't be null", controller.getDbManager());
+        assertNotNull("Buzzer shouldn't be null", controller.getBuzzer());
 
     }
 
