@@ -49,7 +49,6 @@ public class WebController {
         Display d = controller.getDisplay_one();
         model.addAttribute("display", d);
         LocalDateTime dateTime = controller.getClock().getTime();
-        DateTimeFormatter dateFormatter;
         model.addAttribute("date", dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE));
         model.addAttribute("time", dateTime.format(DateTimeFormatter.ofPattern("HH:mm")));
         return "dashboard";
@@ -70,24 +69,28 @@ public class WebController {
     @RequestMapping("/reduceInsulin")
     public String reduceInsulin(Model model){
         controller.getPump().setReservoir(Math.max(0, controller.getPump().getReservoir() - 100));
+        controller.refreshDisplays.run();
         return "redirect:/dashboard";
     }
 
     @RequestMapping("/refillInsulin")
     public String refillInsulin(Model model){
         controller.getPump().refill();
+        controller.refreshDisplays.run();
         return "redirect:/dashboard";
     }
 
     @RequestMapping("/decreaseSensorBattery")
     public String decreaseSensorBattery(Model model) {
         controller.getSensor().getBattery().setChargeLevel(controller.getSensor().getBattery().getChargeLevel() / 2);
+        controller.refreshDisplays.run();
         return "redirect:/dashboard";
     }
 
     @RequestMapping("/decreasePumpBattery")
     public String decreasePumpBattery(Model model) {
         controller.getPump().getBattery().setChargeLevel(controller.getPump().getBattery().getChargeLevel() / 2);
+        controller.refreshDisplays.run();
         return "redirect:/dashboard";
     }
 
@@ -95,18 +98,23 @@ public class WebController {
     public  String rechargeBatteries(Model model) {
         controller.getPump().getBattery().rechargeBattery();
         controller.getSensor().getBattery().rechargeBattery();
+        controller.refreshDisplays.run();
         return "redirect:/dashboard";
     }
 
     @RequestMapping("/debugPump")
     public String debugPump(Model model) {
         Util.DEBUG_PUMP_CHECK = !Util.DEBUG_PUMP_CHECK;
+        controller.systemCheckTask.run();
+        controller.systemCheckTask.run();
         return "redirect:/dashboard";
     }
 
     @RequestMapping("/debugSensor")
     public String debugSensor(Model model) {
         Util.DEBUG_SENSOR_CHECK = !Util.DEBUG_SENSOR_CHECK;
+        controller.systemCheckTask.run();
+        controller.systemCheckTask.run();
         return "redirect:/dashboard";
     }
 }

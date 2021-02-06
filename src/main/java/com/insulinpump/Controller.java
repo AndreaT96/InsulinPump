@@ -4,39 +4,47 @@ import com.insulinpump.component.*;
 import com.insulinpump.entity.Misura;
 import com.insulinpump.repository.IniezioneRepository;
 import com.insulinpump.repository.MisuraRepository;
-import lombok.*;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 @Service
 public class Controller {
 
-    @Getter private Pump pump;
-    @Getter private Sensor sensor;
-    @Getter private Display display_one;
-    @Getter private Display display_two;
-    @Getter private Clock clock;
-    @Getter private Buzzer buzzer;
-    @Getter private DBManager dbManager;
+    @Getter
+    private Pump pump;
+    @Getter
+    private Sensor sensor;
+    @Getter
+    private Display display_one;
+    @Getter
+    private Display display_two;
+    @Getter
+    private Clock clock;
+    @Getter
+    private Buzzer buzzer;
+    @Getter
+    private DBManager dbManager;
 
-    private int[] last_measurements = new int[3];
+    private AtomicIntegerArray last_measurements = new AtomicIntegerArray(3);
     private boolean[] last_check = new boolean[2];
 
     @Autowired
     public Controller(MisuraRepository misuraRepository, IniezioneRepository iniezioneRepository){
         sensor = new Sensor();
         pump = new Pump();
-        display_one = display_two = new Display(); //TODO parte grafica
+        display_one = display_two = new Display();
         clock = new Clock(this);
         buzzer = new Buzzer();
 
         dbManager = new DBManager(misuraRepository, iniezioneRepository);
         restoreLastMeasurements();
+
     }
 
     public final Runnable insulinTask = () -> {
@@ -46,18 +54,11 @@ public class Controller {
             pump.injectInsulin(dose);
         }
 
-        //Update display infos
-        display_one.setPumpReservoir(pump.getReservoir());
-        display_two.setPumpReservoir(pump.getReservoir());
-        display_one.setPumpBatteryLevel(pump.getBattery().getBatteryPercentage());
-        display_two.setPumpBatteryLevel(pump.getBattery().getBatteryPercentage());
-
         //Insert injection into the DB for logging purposes
         dbManager.sqlIteInsertInjection(dose, clock.getTime());
 
     };
 
-    //TODO bippaggi vari
     public final Runnable systemCheckTask = () -> {
         /*
          * First array posix indicates error for sensor
@@ -93,12 +94,27 @@ public class Controller {
             display_one.setCheck_sensor(false);
             display_two.setCheck_sensor(false);
         }
-
-        //Update sensor battery on display
-        display_one.setSensorBatteryLevel(sensor.getBatteryPercentage());
-        display_two.setSensorBatteryLevel(sensor.getBatteryPercentage());
     };
 
+
+    /**
+     * Refreshes the information sent to the 2 displays
+     */
+    public final Runnable refreshDisplays = () -> {
+        // Set sugar level on display
+        display_one.setSugarLevel(last_measurements.get(2));
+        display_two.setSugarLevel(last_measurements.get(2));
+
+        //Update Reservoir
+        display_one.setPumpReservoir(pump.getReservoir());
+        display_two.setPumpReservoir(pump.getReservoir());
+
+        //Update batteries
+        display_one.setPumpBatteryLevel(pump.getBattery().getBatteryPercentage());
+        display_two.setPumpBatteryLevel(pump.getBattery().getBatteryPercentage());
+        display_one.setSensorBatteryLevel(sensor.getBattery().getBatteryPercentage());
+        display_two.setSensorBatteryLevel(sensor.getBattery().getBatteryPercentage());
+    };
     /**
      * Calculates the correct insulin dose based on the last 3 readings.
      * @return the insulin dose.
@@ -106,10 +122,10 @@ public class Controller {
     public int computeDose() {
         /* reading >= safe zone min, so if dose = 0 no call injectInsuline */
         int dose;
-
-        if (last_measurements[2] >= Util.SAFE_ZONE_MIN && last_measurements[2] <= Util.SAFE_ZONE_MAX) {
+        int lastMeasured = last_measurements.get(2);
+        if (lastMeasured >= Util.SAFE_ZONE_MIN && lastMeasured <= Util.SAFE_ZONE_MAX) {
             dose = computeSafeInsulinDose();
-        } else if (last_measurements[2] < Util.SAFE_ZONE_MIN) {
+        } else if (lastMeasured < Util.SAFE_ZONE_MIN) {
             dose = 0;
         } else {
             dose = computeUnsafeInsulinDose();
@@ -123,9 +139,12 @@ public class Controller {
      * @return the insulin dose.
      */
     public int computeSafeInsulinDose() {
-        if(last_measurements[2] <= last_measurements[1]) return 0;
-        if(last_measurements[2] - last_measurements[1] < last_measurements[1] - last_measurements[0]) return 0;
-        int compDose = (last_measurements[2] - last_measurements[1]) / (4*18); //1 mmol/L = 18 mg/dL
+        int r2 = last_measurements.get(2);
+        int r1 = last_measurements.get(1);
+        int r0 = last_measurements.get(0);
+        if(r2 <= r1) return 0;
+        if(r2 - r1 < r1 - r0) return 0;
+        int compDose = (r2 - r1) / (4*18); //1 mmol/L = 18 mg/dL
         if(compDose == 0) compDose = Util.MINIMUM_DOSE;
         return compDose;
     }
@@ -136,7 +155,7 @@ public class Controller {
      */
     public int computeUnsafeInsulinDose() {
         // without specific requirements
-        if(last_measurements[2] > Util.DANGEROUS_ZONE)
+        if(last_measurements.get(2) > Util.DANGEROUS_ZONE)
             return 1 + 2 * computeSafeInsulinDose();
         else
             return 2 * computeSafeInsulinDose();
@@ -164,12 +183,12 @@ public class Controller {
                 long minutes = ChronoUnit.MINUTES.between(clock.getTime(), timestamp);
                 if(minutes < 0) minutes = - minutes;
                 if (minutes <= Util.CONTROLLER_BOOT_FRESHNESS_MINUTES) {
-                    last_measurements[i--] = m.getLettura();
+                    last_measurements.set(i--, m.getLettura());
                 }
             }
         }
         //add latest reading (new) to DB
-        dbManager.sqlIteInsertReading(last_measurements[2], clock.getTime());
+        dbManager.sqlIteInsertReading(last_measurements.get(2), clock.getTime());
     }
 
     /**
@@ -177,22 +196,19 @@ public class Controller {
      * @return the result code of the DB insertion
      */
     private Long readAndSaveReading() {
-        last_measurements[0] = last_measurements[1];
-        last_measurements[1] = last_measurements[2];
-        last_measurements[2] = sensor.getSugar_level();
-        // Set sugar level on display
-        display_one.setSugarLevel(last_measurements[2]);
-        display_two.setSugarLevel(last_measurements[2]);
-        return dbManager.sqlIteInsertReading(last_measurements[2], clock.getTime());
+        last_measurements.set(0 ,last_measurements.get(1));
+        last_measurements.set(1, last_measurements.get(2));
+        int newSugarLevel = sensor.getSugar_level();
+        last_measurements.set(2, newSugarLevel);
+        return dbManager.sqlIteInsertReading(newSugarLevel, clock.getTime());
     }
 
     /**
      *
      */
     public void forceLastReadings(int r0, int r1, int r2) {
-        last_measurements[0] = r0;
-        last_measurements[1] = r1;
-        last_measurements[2] = r2;
+        last_measurements.set(0, r0);
+        last_measurements.set(1, r1);
+        last_measurements.set(2, r2);
     }
 }
-
