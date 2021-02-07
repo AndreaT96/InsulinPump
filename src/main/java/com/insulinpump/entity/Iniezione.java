@@ -1,7 +1,7 @@
 package com.insulinpump.entity;
 
-import com.insulinpump.Util;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,14 +15,17 @@ public class Iniezione {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     @Getter
+    @Setter
     private Long id;
     @Getter
+    @Setter
     private LocalDateTime date;
     @Getter
+    @Setter
     private int unita;
 
     protected Iniezione() {}
-
+    
     public Iniezione(LocalDateTime date, int unita) {
         this.date = date;
         this.unita = unita;

@@ -1,10 +1,10 @@
 package com.insulinpump.repository;
 
-import java.util.List;
-
 import com.insulinpump.entity.Misura;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+
+import java.util.List;
 
 
 public interface MisuraRepository extends PagingAndSortingRepository<Misura, Long> {

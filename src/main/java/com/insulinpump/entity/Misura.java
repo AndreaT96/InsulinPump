@@ -1,7 +1,7 @@
 package com.insulinpump.entity;
 
-import com.insulinpump.Util;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,10 +15,13 @@ public class Misura {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     @Getter
+    @Setter
     private Long id;
     @Getter
+    @Setter
     private LocalDateTime date;
     @Getter
+    @Setter
     private int lettura;
 
     protected Misura() {}
@@ -27,12 +30,4 @@ public class Misura {
         this.date = date;
         this.lettura = lettura;
     }
-
-    @Override
-    public String toString() {
-        return String.format(
-                "Misure[id=%d, date='%s', lettura='%i']",
-                id, Util.dateToSqliteString(date), lettura);
-    }
-
 }

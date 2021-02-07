@@ -4,15 +4,13 @@ import com.insulinpump.entity.Iniezione;
 import com.insulinpump.entity.Misura;
 import com.insulinpump.repository.IniezioneRepository;
 import com.insulinpump.repository.MisuraRepository;
-import lombok.*;
+import lombok.NonNull;
 
-import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class DBManager {
 
-    @Getter
     private MisuraRepository misuraRepository;
     private IniezioneRepository iniezioneRepository;
 
@@ -26,8 +24,8 @@ public class DBManager {
      * @param level of sugar measured by the sensor
      * @param date of the reading
      * @return the id of the record
-     * @throws IllegalArgumentException
-     * @throws NullPointerException
+     * @throws IllegalArgumentException in case the date object is null
+     * @throws NullPointerException in case the save fails and results in an empty Entity
      */
     public Long sqlIteInsertReading(int level, @NonNull LocalDateTime date) throws IllegalArgumentException, NullPointerException {
         return misuraRepository.save(new Misura(date, level)).getId();
@@ -38,8 +36,8 @@ public class DBManager {
      * @param amount of insulin units injected.
      * @param date of the injection
      * @return the id of the record
-     * @throws IllegalArgumentException
-     * @throws NullPointerException
+     * @throws IllegalArgumentException in case the date object is null
+     * @throws NullPointerException in case the save fails and results in an empty Entity
      */
     public Long sqlIteInsertInjection(int amount, @NonNull LocalDateTime date) throws IllegalArgumentException, NullPointerException {
         return iniezioneRepository.save(new Iniezione(date, amount)).getId();

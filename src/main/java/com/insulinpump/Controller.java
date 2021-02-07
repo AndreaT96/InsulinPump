@@ -5,6 +5,7 @@ import com.insulinpump.entity.Misura;
 import com.insulinpump.repository.IniezioneRepository;
 import com.insulinpump.repository.MisuraRepository;
 import lombok.Getter;
+import lombok.Synchronized;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +32,8 @@ public class Controller {
     @Getter
     private DBManager dbManager;
 
-    private AtomicIntegerArray last_measurements = new AtomicIntegerArray(3);
-    private boolean[] last_check = new boolean[2];
+    private final AtomicIntegerArray last_measurements = new AtomicIntegerArray(3);
+    private final boolean[] last_check = new boolean[2];
 
     @Autowired
     public Controller(MisuraRepository misuraRepository, IniezioneRepository iniezioneRepository){
@@ -48,10 +49,25 @@ public class Controller {
     }
 
     public final Runnable insulinTask = () -> {
-        readAndSaveReading();
+        long result = readAndSaveReading();
+        if(result == (long)sensor.SENSOR_ERROR) {
+            //An error has occurred while reading from sensor. The system will alert the user
+            last_check[0] = true;
+            buzzer.start();
+            display_one.setCheck_sensor(true);
+            display_two.setCheck_sensor(true);
+            return;
+        }
         int dose = computeDose();
         if(dose != 0) {
-            pump.injectInsulin(dose);
+            if(!pump.injectInsulin(dose)) {
+                //An error has occurred while injecting insulin. The system will alert the user
+                last_check[1] = true;
+                buzzer.start();
+                display_one.setCheck_pump(true);
+                display_two.setCheck_pump(true);
+                return;
+            }
         }
 
         //Insert injection into the DB for logging purposes
@@ -61,13 +77,12 @@ public class Controller {
 
     public final Runnable systemCheckTask = () -> {
         /*
-         * First array posix indicates error for sensor
-         * Second array posix indicates error for pump
+         First array posix indicates error for sensor
+         Second array posix indicates error for pump
          */
         if(!pump.checkStatus()) {
             if (last_check[1]){
                 buzzer.start();
-                //TODO Display error
                 display_one.setCheck_pump(true);
                 display_two.setCheck_pump(true);
             } else {
@@ -119,6 +134,7 @@ public class Controller {
      * Calculates the correct insulin dose based on the last 3 readings.
      * @return the insulin dose.
      */
+    @Synchronized("last_measurements")
     public int computeDose() {
         /* reading >= safe zone min, so if dose = 0 no call injectInsuline */
         int dose;
@@ -138,6 +154,7 @@ public class Controller {
      * Calculates the insulin dose based on the last 3 readings when the sugar level is in the safe zone.
      * @return the insulin dose.
      */
+    @Synchronized("last_measurements")
     public int computeSafeInsulinDose() {
         int r2 = last_measurements.get(2);
         int r1 = last_measurements.get(1);
@@ -153,6 +170,7 @@ public class Controller {
      * Calculates the insulin dose based on the last 3 readings when the sugar level is not in the safe zone.
      * @return the insulin dose.
      */
+    @Synchronized("last_measurements")
     public int computeUnsafeInsulinDose() {
         // without specific requirements
         if(last_measurements.get(2) > Util.DANGEROUS_ZONE)
@@ -165,6 +183,7 @@ public class Controller {
      * Loads into "last_measurements" array the two most recent sugar level measurements from the Database, as long as they're not older than 45 minutes.
      * Otherwise it'll use a newly made reading from the sensor.
      */
+    @Synchronized("last_measurements")
     private void restoreLastMeasurements() {
         //Do a measurement as soon as the controller boots up. this will be our R2
         //Fill preemptively the other 2 array cells with the same value. If suitable readings will be found in the DB, those ones will be used instead.
@@ -195,10 +214,17 @@ public class Controller {
      * Reads the sugar level from the sensors then stores it in the DB.
      * @return the result code of the DB insertion
      */
-    private Long readAndSaveReading() {
+    @Synchronized("last_measurements")
+    private long readAndSaveReading() {
+        int newSugarLevel = sensor.SENSOR_ERROR;
+        for(int i = 0; i < 3 && newSugarLevel == sensor.SENSOR_ERROR; i++) {
+            //if a network problem occurs, try again
+            newSugarLevel = sensor.getSugar_level();
+        }
+        if(newSugarLevel == sensor.SENSOR_ERROR) return (long)newSugarLevel;
+
         last_measurements.set(0 ,last_measurements.get(1));
         last_measurements.set(1, last_measurements.get(2));
-        int newSugarLevel = sensor.getSugar_level();
         last_measurements.set(2, newSugarLevel);
         return dbManager.sqlIteInsertReading(newSugarLevel, clock.getTime());
     }
@@ -206,9 +232,11 @@ public class Controller {
     /**
      *
      */
+    @Synchronized("last_measurements")
     public void forceLastReadings(int r0, int r1, int r2) {
         last_measurements.set(0, r0);
         last_measurements.set(1, r1);
         last_measurements.set(2, r2);
     }
+
 }

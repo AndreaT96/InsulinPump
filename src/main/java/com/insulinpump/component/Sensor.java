@@ -2,7 +2,6 @@ package com.insulinpump.component;
 
 import com.insulinpump.Util;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * This mockup class represents a basic battery powered blood sugar sensor.
@@ -12,34 +11,30 @@ public class Sensor {
     private int sugar_level = 130;
 
     @Getter
-    @Setter
     private Battery battery = new Battery();
 
+    public final int SENSOR_ERROR = -1;
     /**
      * This methods return the blood-sugar level.
      * The charge of battery is calculated by com.insulinpump.component.Battery() class.
+     * @return SENSOR_ERROR if an error occurred, the sugar level otherwise
      */
     public int getSugar_level(){
+        //Simulates network interferences
+        if(Math.random() <= Util.PERCENTAGE_SIMULATE_ERROR || Util.DEBUG_FORCE_NETWORK_ERROR) return SENSOR_ERROR;
+
+
         if(sugar_level > 180) {
             sugar_level += (int) (Math.random() * 10) - 10;
-        } if(sugar_level < 50) {
+        } else if(sugar_level < 80) {
             sugar_level += (int) (Math.random() * 20);
-        } else {
+        } else if (sugar_level < 130) {
             sugar_level += (int) (Math.random() * 20) - 9;
+        } else {
+            sugar_level += (int) (Math.random() * 10) - 5;
         }
         battery.decreaseLevel(1);
         return sugar_level;
-    }
-
-    /**
-     * This methods return the battery level of sensor.
-     * The charge of battery is calculated by com.insulinpump.component.Battery() class.
-     */
-    public int getBatteryPercentage(){
-        if (battery.getBatteryPercentage() == 0){
-            battery = new Battery();
-        }
-        return battery.getBatteryPercentage();
     }
 
     public boolean checkStatus() {

@@ -66,6 +66,13 @@ public class WebController {
         return "graph2";
     }
 
+    @RequestMapping("/deleteData")
+    public String deleteData(Model model) {
+        misuraRepository.deleteAll();
+        iniezioneRepository.deleteAll();
+        return "redirect:/dashboard";
+    }
+
     @RequestMapping("/reduceInsulin")
     public String reduceInsulin(Model model){
         controller.getPump().setReservoir(Math.max(0, controller.getPump().getReservoir() - 100));
@@ -96,8 +103,8 @@ public class WebController {
 
     @RequestMapping("rechargeBatteries")
     public  String rechargeBatteries(Model model) {
-        controller.getPump().getBattery().rechargeBattery();
-        controller.getSensor().getBattery().rechargeBattery();
+        controller.getPump().getBattery().recharge();
+        controller.getSensor().getBattery().recharge();
         controller.refreshDisplays.run();
         return "redirect:/dashboard";
     }

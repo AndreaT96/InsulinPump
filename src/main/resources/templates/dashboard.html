@@ -64,7 +64,7 @@
 			  <div class="pAlert themed-grid-col text-center">
 				<i th:if="${display.check_pump}" class="fa bi-exclamation-triangle-fill"></i>
 			  </div>
-			  <div class="pReservoir themed-grid-col"><span th:text="${display.pumpReservoir}">300u</span></div>
+			  <div class="pReservoir themed-grid-col"><span th:text="${display.pumpReservoir + ' u'}">300u</span></div>
 			  <div class="sBattery themed-grid-col">
 				<div class = "row">
 					<div class = "col-md-3">
@@ -88,7 +88,16 @@
 					<strong th:text="${display.sugarLevel}" class="fas fa-stack-2x fa-inverse" style="font-size:4rem;">130</strong>
 				  </span>
 			  </div>
-				<div class="pulsanti themed-grid-col text-center"><a href="/graph"><i class = "fa bi-graph-down"></i></a></div>
+				<div class="pulsanti themed-grid-col text-center">
+					<div class = "row">
+						<div class = "col">
+							<a href="/graph"><i class = "fa bi-graph-down"></i></a>
+						</div>
+						<div class = "col">
+							<a href="/deleteData"><i class = "fa bi-trash-fill"></i></a>
+						</div>
+					</div>
+				</div>
 			</div>
 			<h2>DEBUG BUTTONS</h2>
 			<div class = "row row-cols-3 gy-3">

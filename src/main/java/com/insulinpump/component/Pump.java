@@ -23,7 +23,7 @@ public class Pump {
      * @return true if the pump is working properly, else if a mechanical problem has been detected.
      */
     public boolean checkStatus() {
-        return !Util.DEBUG_PUMP_CHECK && reservoir >= MINIMUM_RESERVOIR_LEVEL && battery.getChargeLevel() > 0;
+        return !Util.DEBUG_PUMP_CHECK && reservoir >= MINIMUM_RESERVOIR_LEVEL && battery.getBatteryPercentage() > 5;
     }
 
     /**
@@ -33,9 +33,9 @@ public class Pump {
      */
     public boolean injectInsulin(int amount) {
         //amount is used as "battery consumption" as well.
-        if(amount < 0 || reservoir < amount || battery.getChargeLevel() < amount) return false;
+        if(amount < 0 || reservoir < amount || battery.getChargeLevel() < amount || Util.DEBUG_FORCE_PUMP_ERROR) return false;
         try {
-            Thread.sleep(amount* 1000L);
+            Thread.sleep(amount * 1000L / Util.SPEED);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

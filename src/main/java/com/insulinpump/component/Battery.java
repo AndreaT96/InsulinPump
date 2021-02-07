@@ -2,9 +2,11 @@ package com.insulinpump.component;
 
 import lombok.*;
 public class Battery {
-    private boolean bCharging;
-    @Getter @Setter private int chargeLevel;
-    @Getter private int originalCapacity;
+    @Getter
+    @Setter
+    private int chargeLevel;
+    @Getter
+    private int originalCapacity;
 
     public Battery() {
         this.chargeLevel = 60*24*7; //7 days
@@ -35,7 +37,10 @@ public class Battery {
         return chargeLevel*100/originalCapacity;
     }
 
-    public void rechargeBattery() {
+    /**
+     * Fully recharges the battery.
+     */
+    public void recharge() {
         chargeLevel = originalCapacity;
     }
 
