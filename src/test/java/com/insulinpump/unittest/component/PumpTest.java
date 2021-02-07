@@ -1,10 +1,12 @@
-package com.insulinpump.component;
+package com.insulinpump.unittest.component;
+
 import com.insulinpump.Util;
+import com.insulinpump.component.Pump;
 import org.junit.Before;
 import org.junit.Test;
 
-
 import static org.junit.Assert.*;
+
 public class PumpTest {
     private Pump pump;
 
@@ -13,6 +15,9 @@ public class PumpTest {
         pump = new Pump();
     }
 
+    /**
+     * This test aims to check the correct functionality of the pump.checkStatus() method when the DEBUG flag is turned on
+     */
     @Test
     public void testSensorStatus() {
         Util.DEBUG_PUMP_CHECK = true;
@@ -20,11 +25,14 @@ public class PumpTest {
         Util.DEBUG_PUMP_CHECK = false;
     }
 
+    /**
+     * This test aims to check the correct functionality of the pump.checkStatus() method when the DEBUG flag is turned on
+     */
     @Test
     public void testBatteryStatus() {
         pump.getBattery().setChargeLevel(0);
         assertFalse("Sensor should malfunction with low battery", pump.checkStatus());
-        pump.getBattery().rechargeBattery();
+        pump.getBattery().recharge();
         assertTrue("Sensor shouldn't malfunction with full battery", pump.checkStatus());
     }
 
@@ -33,7 +41,7 @@ public class PumpTest {
         pump.setReservoir(0);
         assertFalse("Sensor should malfunction with low insulin level in the reservoir", pump.checkStatus());
         pump.setReservoir(pump.MINIMUM_RESERVOIR_LEVEL);
-        pump.getBattery().rechargeBattery();
+        pump.getBattery().recharge();
         assertTrue("Sensor shouldn't malfunction with the just enough insulin to supply MAX_DOSE",pump.checkStatus());
         pump.setReservoir(pump.MINIMUM_RESERVOIR_LEVEL - 1);
         assertFalse("Sensor should malfunction without enough insulin to supply MAX_DOSE", pump.checkStatus());
