@@ -9,6 +9,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
 
+/**
+ * JPA Entity class that represent a simple DB Table to store up the log of previous insulin injection
+ */
 @Entity
 public class Iniezione {
 

@@ -10,11 +10,14 @@ public class Pump {
     @Setter
     private int reservoir;
 
+    private final NeedleAssembly needleAssembly;
+
     @Getter
     private Battery battery;
     public final int MINIMUM_RESERVOIR_LEVEL = 3;
     public  Pump() {
         battery = new Battery();
+        needleAssembly = new NeedleAssembly();
         reservoir = Util.RESERVOIR_CAPACITY;
     }
 
@@ -35,7 +38,11 @@ public class Pump {
         //amount is used as "battery consumption" as well.
         if(amount < 0 || reservoir < amount || battery.getChargeLevel() < amount || Util.DEBUG_FORCE_PUMP_ERROR) return false;
         try {
+            //let the insulin flow
+            needleAssembly.open();
             Thread.sleep(amount * 1000L / Util.SPEED);
+            //stop the flow
+            needleAssembly.close();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

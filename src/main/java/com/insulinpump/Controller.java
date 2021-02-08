@@ -35,6 +35,12 @@ public class Controller {
     private final AtomicIntegerArray last_measurements = new AtomicIntegerArray(3);
     private final boolean[] last_check = new boolean[2];
 
+    /**
+     * Constructs a new controller given the two table repositories. They're needed to access the DB.
+     * It'll also try to restore the most recent readings from the DB (if they're fresh enough).
+     * @param misuraRepository the repository for Misura table
+     * @param iniezioneRepository the repository for Iniezione table
+     */
     @Autowired
     public Controller(MisuraRepository misuraRepository, IniezioneRepository iniezioneRepository){
         sensor = new Sensor();
@@ -48,6 +54,10 @@ public class Controller {
 
     }
 
+    /**
+     * This runnable task is scheduled by the clock component.
+     * It'll calculate the insulin dose and, if it's > 0 it'll try to inject it into the patient.
+     */
     public final Runnable insulinTask = () -> {
         long result = readAndSaveReading();
         if(result == (long)sensor.SENSOR_ERROR) {
@@ -75,6 +85,10 @@ public class Controller {
 
     };
 
+    /**
+     * This runnable task is scheduled by the clock component.
+     * It'll check the status of the system components and promptly report any malfunction to the user.
+     */
     public final Runnable systemCheckTask = () -> {
         /*
          First array posix indicates error for sensor
@@ -130,6 +144,7 @@ public class Controller {
         display_one.setSensorBatteryLevel(sensor.getBattery().getBatteryPercentage());
         display_two.setSensorBatteryLevel(sensor.getBattery().getBatteryPercentage());
     };
+
     /**
      * Calculates the correct insulin dose based on the last 3 readings.
      * @return the insulin dose.
@@ -221,7 +236,7 @@ public class Controller {
             //if a network problem occurs, try again
             newSugarLevel = sensor.getSugar_level();
         }
-        if(newSugarLevel == sensor.SENSOR_ERROR) return (long)newSugarLevel;
+        if(newSugarLevel == sensor.SENSOR_ERROR) return newSugarLevel;
 
         last_measurements.set(0 ,last_measurements.get(1));
         last_measurements.set(1, last_measurements.get(2));
@@ -230,7 +245,10 @@ public class Controller {
     }
 
     /**
-     *
+     * This method is used to forcefully overwrite the last measured sugar levels.
+     * @param r0 - the 3rd most recent sugar level measured.
+     * @param r1 - the 2nd most recent sugar level measured
+     * @param r2 - the most recent sugar level measured
      */
     @Synchronized("last_measurements")
     public void forceLastReadings(int r0, int r1, int r2) {

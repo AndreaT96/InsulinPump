@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.Synchronized;
 
+/**
+ * A simple mockup class for the display.
+ */
 @Getter(onMethod_={@Synchronized})
 @Setter(onMethod_={@Synchronized})
 public class Display {

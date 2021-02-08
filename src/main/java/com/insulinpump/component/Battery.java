@@ -23,6 +23,11 @@ public class Battery {
         this.originalCapacity = chargeLevel;
     }
 
+    /**
+     * Decreases the desired level of charge level from the battery.
+     * @param amount to decrease. It does NOT represent the PERCENTAGE to decrease.
+     * @return the updated charge level
+     */
     public int decreaseLevel(int amount) {
         chargeLevel -= amount;
         if (chargeLevel < 0) chargeLevel = 0;

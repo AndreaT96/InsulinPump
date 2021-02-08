@@ -2,6 +2,10 @@ package com.insulinpump;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+/**
+ * Static class with configurable fields and utility methods.
+ */
 public class Util {
 
     public static final int CONTROLLER_BOOT_FRESHNESS_MINUTES = 45;
@@ -20,7 +24,7 @@ public class Util {
     public static boolean DEBUG_FORCE_PUMP_ERROR = false;
 
 
-    private static DateTimeFormatter sqliteFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter sqliteFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static String dateToSqliteString(LocalDateTime date) {
         if(date == null) return  null;

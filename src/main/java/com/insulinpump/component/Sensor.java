@@ -21,7 +21,7 @@ public class Sensor {
      */
     public int getSugar_level(){
         //Simulates network interferences
-        if(Math.random() <= Util.PERCENTAGE_SIMULATE_ERROR || Util.DEBUG_FORCE_NETWORK_ERROR) return SENSOR_ERROR;
+        if(getBattery().getChargeLevel() < 1 || Math.random() <= Util.PERCENTAGE_SIMULATE_ERROR || Util.DEBUG_FORCE_NETWORK_ERROR) return SENSOR_ERROR;
 
 
         if(sugar_level > 180) {
@@ -37,6 +37,11 @@ public class Sensor {
         return sugar_level;
     }
 
+    /**
+     * Checks if the sensor is working properly.
+     * It's part of the self diagnostic of the project
+     * @return true if it's working as intended, false if a problem was found
+     */
     public boolean checkStatus() {
         return !Util.DEBUG_SENSOR_CHECK && battery.getBatteryPercentage() > 5;
     }
