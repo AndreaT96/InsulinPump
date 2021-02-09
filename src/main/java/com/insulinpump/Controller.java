@@ -161,7 +161,7 @@ public class Controller {
         } else {
             dose = computeUnsafeInsulinDose();
         }
-        System.out.println("Dose = " + dose);
+        //System.out.println("Dose = " + dose);
         return dose;
     }
 

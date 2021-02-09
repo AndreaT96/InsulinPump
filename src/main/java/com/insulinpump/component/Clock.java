@@ -64,7 +64,7 @@ public class Clock {
         LocalDateTime now = LocalDateTime.now();
         lastReadTime = lastReadTime.plusNanos(ChronoUnit.NANOS.between(lastRealTime,now)*Util.SPEED);
         lastRealTime = now;
-        System.out.println(lastReadTime);
+        //System.out.println(lastReadTime);
         return  lastReadTime;
     }
 }

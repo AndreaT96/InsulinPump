@@ -1,7 +1,6 @@
 package com.insulinpump;
 
 import com.insulinpump.component.Display;
-import com.insulinpump.entity.Misura;
 import com.insulinpump.repository.IniezioneRepository;
 import com.insulinpump.repository.MisuraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedList;
-import java.util.List;
 
 @Controller
 public class WebController {
@@ -32,16 +29,6 @@ public class WebController {
     @RequestMapping("/")
     public String index(){
        return "redirect:/dashboard";
-    }
-
-    @RequestMapping("/list")
-    public String list(Model model){
-        List<Misura> data = new LinkedList<>();
-        for (Misura m: misuraRepository.findAll()){
-            data.add(m);
-        }
-        model.addAttribute("misure", data);
-        return "list";
     }
 
     @RequestMapping("/dashboard")
