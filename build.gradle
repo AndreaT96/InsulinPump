@@ -47,10 +47,11 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         exclude module: 'logback-classic'
     }
-    testCompile group: 'junit', name: 'junit', version: '4.13.1'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.1'
 
-    compile 'net.sourceforge.htmlunit:htmlunit:2.46.0'
-    testCompile group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.30'
+    testImplementation 'net.sourceforge.htmlunit:htmlunit:2.46.0'
+    implementation group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.30'
+
 }
 
 test {
